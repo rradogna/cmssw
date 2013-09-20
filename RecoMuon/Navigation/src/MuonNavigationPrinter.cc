@@ -13,6 +13,9 @@
  * Chang Liu:
  * add compatibleLayers
  * add constructor for MuonTkNavigation
+ *
+ * Cesare Calabria:
+ * GEMs implementation.
  */
 
 #include "RecoMuon/Navigation/interface/MuonNavigationPrinter.h"
