@@ -8,29 +8,29 @@
 #include <iostream>
 
 namespace {
-  // Get CSCDetId from one of the rechits, but then remove the layer part so it's a _chamber_ id
+  // define a Super Layer Id from the first layer of the first rechits, and put to first layer
   inline
-  DetId buildDetId(CSCDetId id) {
-    return CSCDetId(id.endcap(),id.station(),id.ring(),id.chamber(), 0);
+  DetId buildDetId(GEMDetId id) {
+    return GEMDetId(id.region(),id.ring(),id.station(),1,id.chamber(),id.roll());
   }
-
+  
 }
 
-GEMCSCSegment::GEMCSCSegment(const std::vector<const CSCRecHit2D*>& proto_segment, LocalPoint origin, 
+GEMCSCSegment::GEMCSCSegment(const std::vector<const GEMRecHit*>& proto_segment, LocalPoint origin, 
 	LocalVector direction, AlgebraicSymMatrix errors, double chi2) : 
-  RecSegment(buildDetId(proto_segment.front()->cscDetId())),
+  RecSegment(buildDetId(proto_segment.front()->gemId())),
   theOrigin(origin), 
   theLocalDirection(direction), theCovMatrix(errors), theChi2(chi2) {
 
   for(unsigned int i=0; i<proto_segment.size(); ++i)
-    theCSCRecHits.push_back(*proto_segment[i]);
+    theGEMRecHits.push_back(*proto_segment[i]);
 }
 
 GEMCSCSegment::~GEMCSCSegment() {}
 
 std::vector<const TrackingRecHit*> GEMCSCSegment::recHits() const{
   std::vector<const TrackingRecHit*> pointersOfRecHits;
-  for (std::vector<CSCRecHit2D>::const_iterator irh = theCSCRecHits.begin(); irh!=theCSCRecHits.end(); ++irh) {
+  for (std::vector<GEMRecHit>::const_iterator irh = theGEMRecHits.begin(); irh!=theGEMRecHits.end(); ++irh) {
     pointersOfRecHits.push_back(&(*irh));
   }
   return pointersOfRecHits;
@@ -39,7 +39,7 @@ std::vector<const TrackingRecHit*> GEMCSCSegment::recHits() const{
 std::vector<TrackingRecHit*> GEMCSCSegment::recHits() {
   
   std::vector<TrackingRecHit*> pointersOfRecHits;
-  for (std::vector<CSCRecHit2D>::iterator irh = theCSCRecHits.begin(); irh!=theCSCRecHits.end(); ++irh) {
+  for (std::vector<GEMRecHit>::iterator irh = theGEMRecHits.begin(); irh!=theGEMRecHits.end(); ++irh) {
     pointersOfRecHits.push_back(&(*irh));
   }
   return pointersOfRecHits;
@@ -145,9 +145,16 @@ bool CSCSegment::sharesRecHits(const CSCSegment  & anotherSegment) const {
 }
 //
 */
-///?????????? che è Time? da modificare
+
 float GEMCSCSegment::time() const {
   float averageTime=0;
+  /*for (std::vector<GEMRecHit>::const_iterator itRH = theGEMRecHits.begin();
+       itRH != theGEMRecHits.end(); ++itRH) {
+    const  GEMRecHit *recHit = &(*itRH);
+    averageTime+=recHit->tof();
+  }
+  averageTime=averageTime/(theGEMRecHits.size());
+ */
   //std::vector<float> wireTimes;
   /*for (std::vector<CSCRecHit2D>::const_iterator itRH = theCSCRecHits.begin();
        itRH != theCSCRecHits.end(); ++itRH) {
@@ -196,7 +203,7 @@ std::ostream& operator<<(std::ostream& os, const GEMCSCSegment& seg) {
     "0,)\n"<<
     "            chi2/ndf = " << seg.chi2()/double(seg.degreesOfFreedom()) << 
     " #rechits = " << seg.specificRecHits().size();
- //   " ME1/1a duplicates : "<<seg.duplicateSegments().size();
+
   return os;  
 }
 

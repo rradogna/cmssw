@@ -18,6 +18,9 @@
 #include <DataFormats/CSCRecHit/interface/CSCRecHit2DCollection.h>
 #include <DataFormats/CSCRecHit/interface/CSCSegment.h>
 #include <Geometry/CSCGeometry/interface/CSCChamber.h>
+#include <DataFormats/GEMRecHit/interface/GEMRecHitCollection.h>
+#include <DataFormats/GEMRecHit/interface/GEMCSCSegment.h>
+#include <Geometry/GEMGeometry/interface/GEMEtaPartition.h>
 
 #include <FWCore/Framework/interface/Frameworkfwd.h>
 #include <map>
@@ -25,6 +28,8 @@
 
 class GEMCSCSegmentAlgorithm {
 public:
+typedef std::pair<const GEMEtaPartition*, std::map<uint32_t, const GEMEtaPartition*> >GEMCSCEnsamble; 
+
     /// Constructor
     explicit GEMCSCSegmentAlgorithm(const edm::ParameterSet&) {};
     /// Destructor
@@ -32,7 +37,7 @@ public:
 
     /** Run the algorithm = build the segments in this chamber
     */
-    virtual std::vector<CSCSegment> run(const CSCChamber* chamber, const std::vector<const CSCRecHit2D*>& rechits) = 0;  //////DA MODIFICARE
+    virtual std::vector<GEMCSCSegment> run(GEMCSCEnsamble ensamble, const std::vector<const GEMRecHit*>& rechits) = 0;
 
     private:
 };

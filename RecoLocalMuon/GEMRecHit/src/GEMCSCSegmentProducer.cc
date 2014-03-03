@@ -42,10 +42,10 @@ void GEMCSCSegmentProducer::produce(edm::Event& ev, const edm::EventSetup& setup
   
   
   ///////?????????????????? due geometrie
-    //edm::ESHandle<CSCGeometry> h;
-    //setup.get<MuonGeometryRecord>().get(h);
-    //const CSCGeometry* pgeom = &*h;
-    //segmentBuilder_->setGeometry(pgeom);
+    edm::ESHandle<GEMGeometry> h;
+    setup.get<MuonGeometryRecord>().get(h);
+    const GEMGeometry* pgeom = &*h;
+    segmentBuilder_->setGeometry(pgeom);
 	
     // get the collection of CSCSegment and GEMRecHits
     edm::Handle<GEMRecHitCollection> gemRecHits;
@@ -60,7 +60,7 @@ void GEMCSCSegmentProducer::produce(edm::Event& ev, const edm::EventSetup& setup
     std::auto_ptr<GEMCSCSegmentCollection> oc( new GEMCSCSegmentCollection );
 //to be modified
   	// fill the collection
-    segmentBuilder_->build(cscRecHits.product(), *oc); //@@ FILL oc
+    segmentBuilder_->build(gemRecHits.product(), *oc); //@@ FILL oc
 
     // put collection in event
     ev.put(oc);

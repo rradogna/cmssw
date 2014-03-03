@@ -13,6 +13,7 @@
 #include <DataFormats/TrackingRecHit/interface/RecSegment.h>
 
 #include <DataFormats/GEMRecHit/interface/GEMRecHitCollection.h>
+#include <DataFormats/GEMRecHit/interface/GEMRecHit.h>
 
 #include <DataFormats/CSCRecHit/interface/CSCRecHit2D.h>
 #include <DataFormats/CSCRecHit/interface/CSCRecHit2DCollection.h>
@@ -21,7 +22,7 @@
 
 #include <iosfwd>
 
-class CSCDetId; //????????????
+class GEMDetId;
 
 class GEMCSCSegment GCC11_FINAL : public RecSegment {
 
@@ -31,7 +32,7 @@ public:
     GEMCSCSegment() : theChi2(0.) {}
 	
     /// Constructor
-    GEMCSCSegment(const std::vector<const CSCRecHit2D*>& proto_segment, LocalPoint origin, 
+    GEMCSCSegment(const std::vector<const GEMRecHit*>& proto_segment, LocalPoint origin, 
         	LocalVector direction, AlgebraicSymMatrix errors, double chi2);
   
     /// Destructor
@@ -63,15 +64,16 @@ public:
 
     virtual int dimension() const { return 4; }
 
-    virtual int degreesOfFreedom() const { return 2*nRecHits() - 4;}	 
+    //virtual int degreesOfFreedom() const { return 2*nRecHits() - 4;}
+    virtual int degreesOfFreedom() const { return nRecHits();}	 
 
     //--- Extension of the interface
         
-    const std::vector<CSCRecHit2D>& specificRecHits() const { return theCSCRecHits; } // da modificare
+    const std::vector<GEMRecHit>& specificRecHits() const { return theGEMRecHits; } // da modificare
 
-    int nRecHits() const { return theCSCRecHits.size(); }        
+    int nRecHits() const { return theGEMRecHits.size(); }        
 
-    CSCDetId cscDetId() const { return  geographicalId(); }
+    GEMDetId gemDetId() const { return  geographicalId(); }
 
     /*void setDuplicateSegments(std::vector<CSCSegment*>& duplicates);
 
@@ -95,7 +97,7 @@ public:
     
  private:
     
-    std::vector<CSCRecHit2D> theCSCRecHits;
+    std::vector<GEMRecHit> theGEMRecHits;
     LocalPoint theOrigin;   // in chamber frame - the GeomDet local coordinate system
     LocalVector theLocalDirection; // in chamber frame - the GeomDet local coordinate system
     AlgebraicSymMatrix theCovMatrix; // the covariance matrix
@@ -105,4 +107,4 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const GEMCSCSegment& seg);
 
-#endif // CSCRecHit_CSCSegment_h
+#endif 

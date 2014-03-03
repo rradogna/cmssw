@@ -28,8 +28,6 @@
 
 #include <FWCore/ParameterSet/interface/ParameterSet.h>
 
-//?????class GEMCSCGeometry;
-
 class GEMCSCSegmentAlgorithm;
 
 class GEMCSCSegmentBuilder {
@@ -43,20 +41,18 @@ public:
     /// Destructor
     ~GEMCSCSegmentBuilder();
 
-////////DA MODIFICARE
-    /** Find rechits in each CSCChamber, build CSCSegment's in each chamber,
+    /** Find rechits in each GEMChamber and Segment in CSCChamber, build GEMCSCSegment,
      *  and fill into output collection. 
      */
-    void build(const CSCRecHit2DCollection* rechits, GEMCSCSegmentCollection& oc);
+    void build(const GEMRecHitCollection* rechits, GEMCSCSegmentCollection& oc); //???
     /** Cache pointer to geometry _for current event_
      */
-    void setGeometry(const CSCGeometry* geom);
+    void setGeometry(const GEMGeometry* geom); //2 geom?
 
-private:
+     private:
     GEMCSCSegmentAlgorithm* algo;
-    const CSCGeometry* geom_;
+    const GEMGeometry* geom_;
 
-    //std::map<std::string, CSCSegmentAlgorithm*> algoMap;
 };
 
 #endif
