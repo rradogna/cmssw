@@ -44,7 +44,7 @@ public:
     /** Find rechits in each GEMChamber and Segment in CSCChamber, build GEMCSCSegment,
      *  and fill into output collection. 
      */
-    void build(const GEMRecHitCollection* rechits, GEMCSCSegmentCollection& oc); //???
+    void build(const GEMRecHitCollection* rechits,const CSCSegmentCollection* cscsegments, GEMCSCSegmentCollection& oc); //???
     /** Cache pointer to geometry _for current event_
      */
     void setGeometry(const GEMGeometry* geom); //2 geom?

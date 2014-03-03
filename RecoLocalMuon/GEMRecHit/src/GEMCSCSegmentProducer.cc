@@ -60,7 +60,7 @@ void GEMCSCSegmentProducer::produce(edm::Event& ev, const edm::EventSetup& setup
     std::auto_ptr<GEMCSCSegmentCollection> oc( new GEMCSCSegmentCollection );
 //to be modified
   	// fill the collection
-    segmentBuilder_->build(gemRecHits.product(), *oc); //@@ FILL oc
+    segmentBuilder_->build(gemRecHits.product(), cscSegment.product(), *oc); //@@ FILL oc
 
     // put collection in event
     ev.put(oc);

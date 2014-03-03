@@ -48,9 +48,9 @@ GEMCSCSegmentBuilder::~GEMCSCSegmentBuilder() {
     delete algo;
 }
 
-void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits, GEMCSCSegmentCollection& oc) {
+void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits, const CSCSegmentCollection* cscsegments, GEMCSCSegmentCollection& oc) {
   	
-  LogDebug("GEMCSCSegment|GEMCSC")<< "Total number of rechits in this event: " << recHits->size();
+  LogDebug("GEMCSCSegment|GEMCSC")<< "Total number of rechits in this event: " << recHits->size()<< "Total number of csc segments" << cscsegments->size();
 
     std::vector<CSCDetId> chambers;//?
     std::vector<CSCDetId>::const_iterator chIt;//?
