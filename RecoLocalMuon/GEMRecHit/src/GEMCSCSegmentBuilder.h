@@ -47,11 +47,12 @@ public:
     void build(const GEMRecHitCollection* rechits,const CSCSegmentCollection* cscsegments, GEMCSCSegmentCollection& oc); //???
     /** Cache pointer to geometry _for current event_
      */
-    void setGeometry(const GEMGeometry* geom); //2 geom?
+    void setGeometry(const GEMGeometry* gemgeom, const CSCGeometry* cscgeom); 
 
      private:
     GEMCSCSegmentAlgorithm* algo;
-    const GEMGeometry* geom_;
+    const GEMGeometry* gemgeom_;
+    const CSCGeometry* cscgeom_;
 
 };
 

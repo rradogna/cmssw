@@ -40,12 +40,16 @@ void GEMCSCSegmentProducer::produce(edm::Event& ev, const edm::EventSetup& setup
 	
     // find the geometry (& conditions?) for this event & cache it in the builder
   
-  
-  ///////?????????????????? due geometrie
-    edm::ESHandle<GEMGeometry> h;
-    setup.get<MuonGeometryRecord>().get(h);
-    const GEMGeometry* pgeom = &*h;
-    segmentBuilder_->setGeometry(pgeom);
+
+    edm::ESHandle<CSCGeometry> cscg;
+    setup.get<MuonGeometryRecord>().get(cscg);
+    const CSCGeometry* cgeom = &*cscg;
+    
+    edm::ESHandle<GEMGeometry> gemg;
+    setup.get<MuonGeometryRecord>().get(gemg);
+    const GEMGeometry* ggeom = &*gemg;
+    
+    segmentBuilder_->setGeometry(ggeom,cgeom);
 	
     // get the collection of CSCSegment and GEMRecHits
     edm::Handle<GEMRecHitCollection> gemRecHits;

@@ -16,7 +16,6 @@ private:
   GEMRecHitCollection* _ThePoints; 
 
   bool inclcsc;
-
 };
 
 

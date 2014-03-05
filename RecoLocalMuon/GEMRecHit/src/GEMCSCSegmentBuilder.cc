@@ -8,7 +8,7 @@
 
 #include <Geometry/CSCGeometry/interface/CSCChamberSpecs.h>//?
 #include <Geometry/CSCGeometry/interface/CSCLayer.h>//?
-#include <Geometry/CSCGeometry/interface/CSCGeometry.h>//?
+#include <Geometry/CSCGeometry/interface/CSCGeometry.h>
 #include <Geometry/GEMGeometry/interface/GEMGeometry.h>
 #include <Geometry/GEMGeometry/interface/GEMEtaPartition.h>
 
@@ -29,7 +29,7 @@
 #include <FWCore/Utilities/interface/Exception.h>
 #include <FWCore/MessageLogger/interface/MessageLogger.h> 
 
-GEMCSCSegmentBuilder::GEMCSCSegmentBuilder(const edm::ParameterSet& ps) : geom_(0) {
+GEMCSCSegmentBuilder::GEMCSCSegmentBuilder(const edm::ParameterSet& ps) : gemgeom_(0), cscgeom_(0) {
 
     // Algo name
     std::string algoName = ps.getParameter<std::string>("algo_name");
@@ -55,13 +55,16 @@ void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits, const CSCSe
     std::vector<CSCDetId> chambers;//?
     std::vector<CSCDetId>::const_iterator chIt;//?
     
-    std::map<uint32_t, std::vector<GEMRecHit*> > ensembleRH;
+    //std::map<uint32_t, std::vector<GEMRecHit*> > ensembleRH;
+    //std::map<uint32_t, std::vector<RecHit2DLocalPos*> > ensembleRH;
+    std::map<uint32_t, std::vector<TrackingRecHit*> > ensembleRH;
 
   // Loop on the GEM rechit and select the different GEM Ensemble
   for(GEMRecHitCollection::const_iterator it2 = recHits->begin(); it2 != recHits->end(); it2++) {        
     GEMDetId id(it2->gemId().region(),it2->gemId().ring(),it2->gemId().station(),1,it2->gemId().chamber(),it2->gemId().roll());
-    std::vector<GEMRecHit* > pp = ensembleRH[id.rawId()];
-    pp.push_back(it2->clone());
+    TrackingRecHit* lp = dynamic_cast< TrackingRecHit* >( *it2 );
+    std::vector<TrackingRecHit* > pp = ensembleRH[id.rawId()];
+    pp.push_back(lp->clone());
     ensembleRH[id.rawId()]=pp;
   }
 
@@ -70,10 +73,10 @@ void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits, const CSCSe
         std::vector<const GEMRecHit*> gemRecHits;
         std::map<uint32_t,const GEMEtaPartition* > ens;
     
-        const GEMEtaPartition* firstlayer = geom_->etaPartition(enIt->first);
+        const GEMEtaPartition* firstlayer = gemgeom_->etaPartition(enIt->first);
         for(auto rechit = enIt->second.begin(); rechit != enIt->second.end(); rechit++) {
           gemRecHits.push_back(*rechit);
-          ens[(*rechit)->gemId()]=geom_->etaPartition((*rechit)->gemId());
+          ens[(*rechit)->gemId()]=gemgeom_->etaPartition((*rechit)->gemId());
         }    
     GEMCSCSegmentAlgorithm::GEMCSCEnsamble ensamble(std::pair<const GEMEtaPartition*, std::map<uint32_t,const GEMEtaPartition *> >(firstlayer,ens));
     
@@ -89,7 +92,8 @@ void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits, const CSCSe
     }
 }
 
-void GEMCSCSegmentBuilder::setGeometry(const GEMGeometry* geom) {
-	geom_ = geom;
+void GEMCSCSegmentBuilder::setGeometry(const GEMGeometry* gemgeom, const CSCGeometry* cscgeom) {
+	gemgeom_ = gemgeom;
+	cscgeom_ = cscgeom;
 }
 

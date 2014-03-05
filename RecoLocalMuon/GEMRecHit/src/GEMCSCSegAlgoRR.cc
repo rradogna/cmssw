@@ -1,7 +1,7 @@
 /**
- * \file ME0SegAlgoMM.cc
+ * \file GEMCSCSegAlgoMM.cc
  *
- *  \authors: Marcello Maggi
+ *  \authors: Raffaella Radogna
  */
  
 #include "GEMCSCSegAlgoRR.h"
