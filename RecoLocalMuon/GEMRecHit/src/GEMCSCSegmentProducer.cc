@@ -50,6 +50,7 @@ void GEMCSCSegmentProducer::produce(edm::Event& ev, const edm::EventSetup& setup
     const GEMGeometry* ggeom = &*gemg;
     
     segmentBuilder_->setGeometry(ggeom,cgeom);
+    //segmentBuilder_->setSetup(setup);
 	
     // get the collection of CSCSegment and GEMRecHits
     edm::Handle<GEMRecHitCollection> gemRecHits;
@@ -58,13 +59,15 @@ void GEMCSCSegmentProducer::produce(edm::Event& ev, const edm::EventSetup& setup
     ev.getByLabel(inputObjectsTag, cscSegment); 
     edm::Handle<CSCRecHit2DCollection> cscRecHits;
     ev.getByLabel(inputObjectsTag, cscRecHits);
+    
+   // ObjectMapCSC* TheObjectCSC = ObjectMapCSC::GetInstance(setup);
 
 
     // create empty collection of Segments
     std::auto_ptr<GEMCSCSegmentCollection> oc( new GEMCSCSegmentCollection );
-//to be modified
-  	// fill the collection
-    segmentBuilder_->build(gemRecHits.product(), cscSegment.product(), *oc); //@@ FILL oc
+
+    // fill the collection
+    segmentBuilder_->build(gemRecHits.product(), cscSegment.product(), setup, *oc); //@@ FILL oc
 
     // put collection in event
     ev.put(oc);

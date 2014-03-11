@@ -53,7 +53,7 @@ ObjectMapCSC::ObjectMapCSC(const edm::EventSetup& iSetup){
   }
 }
   
-CSCSegtoGEM::CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments, const edm::EventSetup& iSetup,const edm::Event& iEvent, bool debug, double eyr){
+/*CSCSegtoGEM::CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments, const edm::EventSetup& iSetup,const edm::Event& iEvent, bool debug, double eyr){
   
   edm::ESHandle<GEMGeometry> gemGeo;
   edm::ESHandle<CSCGeometry> cscGeo;
@@ -86,10 +86,10 @@ CSCSegtoGEM::CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments, const
       if(debug) std::cout<<"CSC \t \t This Segment is in Chamber id: "<<CSCId<<std::endl;
       if(debug) std::cout<<"CSC \t \t Number of segments in this CSC = "<<CSCSegmentsCounter[CSCId]<<std::endl;
       //if(debug) std::cout<<"CSC \t \t Is the only one in this CSC? is not ind the ring 1 or station 4? Are there more than 2 segments in the event?"<<std::endl;
-       if(debug) std::cout<<"CSC segments diff to zero?"<<std::endl;
+      if(debug) std::cout<<"CSC segments in "<<std::endl;
 
-      //if(CSCSegmentsCounter[CSCId]==1 && CSCId.station()!=4 && CSCId.ring()!=1 && allCSCSegments->size()>=2){
-      if(allCSCSegments->size()!=0){ //???????? inutile, ma che selezione dovrei mettere?
+      if(CSCId.station()==1 && CSCId.ring()==1 ){
+      //if(allCSCSegments->size()!=0){ //???????? inutile, ma che selezione dovrei mettere?
 	if(debug) std::cout<<"CSC \t \t yes"<<std::endl;
 	int cscEndCap = CSCId.endcap();
 	int cscStation = CSCId.station();
@@ -125,7 +125,7 @@ CSCSegtoGEM::CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments, const
 	  float dy=segmentDirection.y();
 	  float dz=segmentDirection.z();
 	*/
-	  if(debug)  std::cout<<"Calling to Object Map class"<<std::endl;
+/*	  if(debug)  std::cout<<"Calling to Object Map class"<<std::endl;
 	  ObjectMapCSC* TheObjectCSC = ObjectMapCSC::GetInstance(iSetup);
 	  if(debug) std::cout<<"Creating the CSCIndex"<<std::endl;
 	  CSCStationIndex theindex(gemRegion,gemStation,gemRing,gemChamber);
@@ -150,7 +150,7 @@ CSCSegtoGEM::CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments, const
 
 	    if(debug) std::cout<<"CSC \t \t Loop over all the rolls asociated to this CSC"<<std::endl;	    
 	    for (std::set<GEMDetId>::iterator iteraRoll = rollsForThisCSC.begin();iteraRoll != rollsForThisCSC.end(); iteraRoll++){
-	      const GEMEtaPartition* rollasociated = gemGeo->etaPartitions(*iteraRoll);
+	      const GEMEtaPartition* rollasociated = gemGeo->etaPartition(*iteraRoll);
 	      GEMDetId gemId = rollasociated->id();
 		
 	      if(debug) std::cout<<"CSC \t \t \t We are in the roll getting the surface"<<gemId<<std::endl;
@@ -212,7 +212,7 @@ CSCSegtoGEM::CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments, const
 
 	    //}
 	  //}
-	}
+/*	}
       }
     }
   }
@@ -221,4 +221,4 @@ CSCSegtoGEM::CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments, const
 CSCSegtoGEM::~CSCSegtoGEM(){
 
 }
-
+*/

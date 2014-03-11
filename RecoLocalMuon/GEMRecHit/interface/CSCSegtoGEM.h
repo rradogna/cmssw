@@ -6,7 +6,7 @@
 #include "DataFormats/GEMRecHit/interface/GEMRecHit.h"
 #include "DataFormats/GEMRecHit/interface/GEMRecHitCollection.h"
 
-class CSCSegtoGEM {
+/*class CSCSegtoGEM {
 public:
   explicit CSCSegtoGEM(edm::Handle<CSCSegmentCollection> allCSCSegments,const edm::EventSetup& iSetup, const edm::Event& iEvent, bool debug, double eyr);
   ~CSCSegtoGEM();
@@ -17,7 +17,7 @@ private:
 
   bool inclcsc;
 };
-
+*/
 
 class CSCStationIndex{
 public:

@@ -37,7 +37,8 @@ typedef std::pair<const GEMEtaPartition*, std::map<uint32_t, const GEMEtaPartiti
 
     /** Run the algorithm = build the segments in this chamber
     */
-    virtual std::vector<GEMCSCSegment> run(GEMCSCEnsamble ensamble, const std::vector<const GEMRecHit*>& rechits) = 0;
+    //virtual std::vector<GEMCSCSegment> run(GEMCSCEnsamble ensamble, const std::vector<const GEMRecHit*>& rechits) = 0;
+    virtual std::vector<GEMCSCSegment> run(GEMCSCEnsamble ensamble, const std::vector<const RecHit2DLocalPos*>& rechits) = 0;
 
     private:
 };

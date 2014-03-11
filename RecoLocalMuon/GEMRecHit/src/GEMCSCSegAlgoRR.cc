@@ -133,7 +133,7 @@ GEMCSCSegAlgoRR::clusterHits(const EnsambleHitContainer & rechits) {
   for(size_t NNN = 0; NNN < seeds.size(); ++NNN) {
     for(size_t MMM = NNN+1; MMM < seeds.size(); ++MMM) {
       if(running_meanX[MMM] == 999999. || running_meanX[NNN] == 999999. ) {
-	LogDebug("ME0Segment|ME0") << "ME0SegAlgoMM::clusterHits: Warning: Skipping used seeds, this should happen - inform developers!";
+	LogDebug("MGEMCSCSegment|GEMCSC") << "GEMCSCSegAlgoRR::clusterHits: Warning: Skipping used seeds, this should happen - inform developers!";
 	//	std::cout<<"We should never see this line now!!!"<<std::endl;
 	continue; //skip seeds that have been used 
       }
@@ -331,7 +331,7 @@ void GEMCSCSegAlgoRR::fitSlopes() {
 
   for (auto ih = proto_segment.begin(); ih != proto_segment.end(); ++ih) {
     const GEMRecHit& hit = (**ih);
-    const GEMEtaPartition* roll  = theEnsamble.second[hit.gemId()];
+    const GEMEtaPartition* roll  = theEnsamble.second[hit.rawId()];
     GlobalPoint gp         = roll->toGlobal(hit.localPosition());
     // Locat w,r,t, to the first layer;
     LocalPoint  lp         = ens->toLocal(gp); 

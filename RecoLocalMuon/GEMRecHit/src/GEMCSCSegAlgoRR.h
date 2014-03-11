@@ -27,7 +27,8 @@ public:
 
   /// Typedefs
 
-  typedef std::vector<const GEMRecHit*> EnsambleHitContainer;
+  //typedef std::vector<const GEMRecHit*> EnsambleHitContainer;
+  typedef std::vector<const RecHit2DLocalPos*> EnsambleHitContainer;
   typedef std::vector<EnsambleHitContainer> ProtoSegments;
   typedef std::deque<bool> BoolContainer;
 

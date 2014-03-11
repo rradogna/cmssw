@@ -15,6 +15,8 @@
  *
  *
  */
+ #include "FWCore/Framework/interface/Event.h"
+ 
 #include <Geometry/CSCGeometry/interface/CSCGeometry.h>      //?
 #include <Geometry/GEMGeometry/interface/GEMGeometry.h>       //?
 #include <Geometry/GEMGeometry/interface/GEMEtaPartition.h>   //?
@@ -44,15 +46,18 @@ public:
     /** Find rechits in each GEMChamber and Segment in CSCChamber, build GEMCSCSegment,
      *  and fill into output collection. 
      */
-    void build(const GEMRecHitCollection* rechits,const CSCSegmentCollection* cscsegments, GEMCSCSegmentCollection& oc); //???
+    void build(const GEMRecHitCollection* rechits,const CSCSegmentCollection* cscsegments, const edm::EventSetup& setup, GEMCSCSegmentCollection& oc); //???
+
     /** Cache pointer to geometry _for current event_
      */
     void setGeometry(const GEMGeometry* gemgeom, const CSCGeometry* cscgeom); 
-
+    //void setSetup(const edm::EventSetup&);
      private:
     GEMCSCSegmentAlgorithm* algo;
     const GEMGeometry* gemgeom_;
     const CSCGeometry* cscgeom_;
+
+    //const edm::EventSetup& setup_;
 
 };
 
