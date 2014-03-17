@@ -27,7 +27,8 @@ public:
 
   /// Typedefs
 
-  //typedef std::vector<const GEMRecHit*> EnsambleHitContainer;
+  typedef std::vector<const GEMRecHit*> EnsambleGEMHitContainer;
+  typedef std::vector<const CSCSegment*> EnsambleCSCSegContainer;
   typedef std::vector<const RecHit2DLocalPos*> EnsambleHitContainer;
   typedef std::vector<EnsambleHitContainer> ProtoSegments;
   typedef std::deque<bool> BoolContainer;
@@ -40,18 +41,18 @@ public:
   /**
    * Build segments for all desired groups of hits
    */
-  std::vector<GEMCSCSegment> run(GEMCSCEnsamble ensamble, const EnsambleHitContainer& rechits); 
+  std::vector<GEMCSCSegment> run(GEMCSCEnsamble ensamble, const EnsambleCSCSegContainer& cscsegments, const EnsambleGEMHitContainer& rechits); 
 
 private:
   /// Utility functions 
 
   //  Build groups of rechits that are separated in x and y to save time on the segment finding
-  ProtoSegments clusterHits(const EnsambleHitContainer & rechits);
+  //ProtoSegments clusterHits(const EnsambleHitContainer & rechits);
 
   // Build groups of rechits that are separated in strip numbers and Z to save time on the segment finding
-  ProtoSegments chainHits(const EnsambleHitContainer & rechits);
+  ProtoSegments chainHitsToSegm(const EnsambleCSCSegContainer cscsegments, const EnsambleGEMHitContainer & rechits);
 
-  bool isGoodToMerge(EnsambleHitContainer & newChain, EnsambleHitContainer & oldChain);
+  //bool isGoodToMerge(EnsambleHitContainer & newChain, EnsambleHitContainer & oldChain);
 
   // Build track segments in this chamber (this is where the actual segment-building algorithm hides.)
   std::vector<GEMCSCSegment> buildSegments(const EnsambleHitContainer& rechits);
@@ -78,10 +79,12 @@ private:
   double  dYclusBoxMax;
   bool    preClustering_useChaining;
   double  dPhiChainBoxMax;
-  double  dEtaChainBoxMax;
+  double  dThEtaChainBoxMax;
   int     maxRecHitsInCluster;
   
  private:
+  EnsambleGEMHitContainer gemrhs;
+  EnsambleCSCSegContainer csc_segment;
   EnsambleHitContainer proto_segment;
   GEMCSCEnsamble theEnsamble;
   LocalPoint protoIntercept;

@@ -65,20 +65,24 @@ void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits, const CSCSe
     setup.get<MuonGeometryRecord>().get(gemGeo);
     setup.get<MuonGeometryRecord>().get(cscGeo);
     
-    //std::map<uint32_t, std::vector<GEMRecHit*> > ensembleRH;
-    std::map<uint32_t, std::vector<RecHit2DLocalPos*> > ensembleRH;
+    std::map<uint32_t, std::vector<GEMRecHit*> > ensembleRH;
+    std::map<uint32_t, std::vector<CSCSegment*> > ensembleS;
+    //std::map<uint32_t, std::vector<RecHit2DLocalPos*> > ensembleRH;
     //std::map<uint32_t, std::vector<TrackingRecHit*> > ensembleRH;
 
 for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cscsegments->end(); segm++) {   
     CSCDetId CSCId = segm->cscDetId();
     if(CSCId.station()==1 && CSCId.ring()==1 ){
-    CSCDetId id(segm->cscDetId().endcap(),segm->cscDetId().station(),segm->cscDetId().ring(),segm->cscDetId().chamber(),1);
+       //CSCDetId id(segm->cscDetId().endcap(),segm->cscDetId().station(),segm->cscDetId().ring(),segm->cscDetId().chamber(),1);
+    std::vector<CSCSegment* > ss = ensembleS[CSCId.rawId()];
+    ss.push_back(segm->clone());
+    ensembleS[CSCId.rawId()]=ss;  
     
-    auto cscSrhs = segm->specificRecHits();
+    /*auto cscSrhs = segm->specificRecHits();
     for (auto rh = cscSrhs.begin(); rh!= cscSrhs.end(); rh++){
-    std::vector<RecHit2DLocalPos* > pp = ensembleRH[id.rawId()];
+    std::vector<RecHit2DLocalPos* > pp = ensembleRH[CSCId.rawId()];
     pp.push_back(rh->clone());
-    ensembleRH[id.rawId()]=pp;
+    ensembleRH[CSCId.rawId()]=pp;*/
     }
     
     int cscEndCap = CSCId.endcap();
@@ -93,14 +97,14 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
     CSCStationIndex theindex(gemRegion,gemStation,gemRing,gemChamber);
     std::set<GEMDetId> rollsForThisCSC = TheObjectCSC->GetInstance(setup)->GetRolls(theindex);
     
-   /* //TrackingRecHit* lp = dynamic_cast< TrackingRecHit* >( *it2 );
+     /* //TrackingRecHit* lp = dynamic_cast< TrackingRecHit* >( *it2 );
     std::vector<RecHit2DLocalPos* > pp = ensembleRH[id.rawId()];
     pp.push_back(it2->clone());
     ensembleRH[id.rawId()]=pp;*/
     
    /* for (std::set<GEMDetId>::iterator iteraRoll = rollsForThisCSC.begin();iteraRoll != rollsForThisCSC.end(); iteraRoll++){
-const GEMEtaPartition* rollasociated = gemGeo->etaPartitions(*iteraRoll);
-GEMDetId gemId = rollasociated->id();*/
+   const GEMEtaPartition* rollasociated = gemGeo->etaPartitions(*iteraRoll);
+   GEMDetId gemId = rollasociated->id();*/
 
   // Loop on the GEM rechit and select the different GEM Ensemble
   for(GEMRecHitCollection::const_iterator it2 = recHits->begin(); it2 != recHits->end(); it2++) {        
@@ -110,9 +114,9 @@ GEMDetId gemId = rollasociated->id();*/
     	const GEMEtaPartition* rollasociated = gemGeo->etaPartition(*iteraRoll);
     	GEMDetId gemIdfromSegm = rollasociated->id();
     	if(it2->gemId().roll()== gemIdfromSegm.roll()){
-    		std::vector<RecHit2DLocalPos* > pp = ensembleRH[id.rawId()];
+    		std::vector<GEMRecHit* > pp = ensembleRH[CSCId.rawId()];
     		pp.push_back(it2->clone());
-    		ensembleRH[id.rawId()]=pp;
+    		ensembleRH[CSCId.rawId()]=pp;
 		
     	}// if roll of gem rec hit is on of the csc segment projection roll	
     }// for roll of te segment
@@ -120,27 +124,44 @@ GEMDetId gemId = rollasociated->id();*/
   }// if ME1/1b
 }// for csc segments
 
+
+  
+	
     //for(CSCRecHit2DCollection::const_iterator it2 = recHits->begin(); it2 != recHits->end(); it2++) {
-    for(auto enIt=ensembleRH.begin(); enIt != ensembleRH.end(); ++enIt) {    
-        //std::vector<const GEMRecHit*> gemRecHits;
-	std::vector<const RecHit2DLocalPos*> gemcscRecHits;
+    for(auto enIt=ensembleRH.begin(); enIt != ensembleRH.end(); enIt++) {    
+        std::vector<const GEMRecHit*> gemRecHits;
+	std::vector<const CSCSegment*> cscSegments;
+	cscSegments = ensembleS[enIt->first]; /////????
+	//std::vector<const RecHit2DLocalPos*> gemcscRecHits;
         std::map<uint32_t,const GEMEtaPartition* > ens;
         //std::map<uint32_t,const CSCChamber* > ens;
-    
-        const GEMEtaPartition* firstlayer = gemgeom_->etaPartition(enIt->first);
-	//const CSCChamber* firstlayer = cscgeom_->chamber(enIt->first);
+        const CSCChamber* cscChamber = cscgeom_->chamber(enIt->first);
+        //const GEMEtaPartition* firstlayer = gemgeom_->etaPartition(enIt->first);
+	
         for(auto rechit = enIt->second.begin(); rechit != enIt->second.end(); rechit++) {
-          gemcscRecHits.push_back(*rechit);
-          //ens[(*rechit)->gemId()]=gemgeom_->etaPartition((*rechit)->gemId());
-	  ens[(*rechit)->rawId()]=gemgeom_->etaPartition((*rechit)->rawId());
-	  //ens[(*rechit)->rawId()]=cscgeom_->chamber((*rechit)->rawId());
-        }    
-    GEMCSCSegmentAlgorithm::GEMCSCEnsamble ensamble(std::pair<const GEMEtaPartition*, std::map<uint32_t,const GEMEtaPartition *> >(firstlayer,ens));
+          gemRecHits.push_back(*rechit);
+          ens[enIt->first]=gemgeom_->etaPartition((*rechit)->gemId());
+	  
+	  /*auto gemlike = gemgeom_->etaPartition((*rechit)->rawId());
+	  if (gemlike !=0)
+	  ens[(*rechit)->rawId()]=gemlike;
+	  else
+	  auto csclike = cscgeom_->chamber((*rechit)->rawId());
+	  if (csclike !=0)
+	  ens[(*rechit)->rawId()]=csclike;
+	  else
+	  std::cout<<"non ti conosco"<<std::endl;*/
+        }  
+	  
+    GEMCSCSegmentAlgorithm::GEMCSCEnsamble ensamble(std::pair<const CSCChamber*, std::map<uint32_t,const GEMEtaPartition *> >(cscChamber,ens));
+   // no geomdet ma gem eta partition
+   // xke io voglio per ogni camera il segmento e le eta partition associate alla camera e tutti i rec hit che adesso sono solo di gem 
     
     LogDebug("GEMCSCSegment|GEMCSC") << "found " << gemcscRecHits.size() << " rechits in chamber " << *enIt;
 
         // given the chamber select the appropriate algo... and run it
-    std::vector<GEMCSCSegment> segv = algo->run(ensamble, gemcscRecHits);
+    std::vector<GEMCSCSegment> segv = algo->run(ensamble, cscSegments, gemRecHits);
+    //run lo posso splittare in tre: passare ensamble, segment e gemrechit n modo da lavorare con elementi separati
     CSCDetId mid(enIt->first);
     LogDebug("GEMSegment|GEM") << "found " << segv.size() << " segments in chamber " << mid;
     
