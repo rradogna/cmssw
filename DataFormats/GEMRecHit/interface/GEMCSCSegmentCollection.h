@@ -18,7 +18,7 @@
 #include <DataFormats/Common/interface/OwnVector.h>
 
 
-typedef edm::RangeMap <GEMDetId, edm::OwnVector<GEMCSCSegment> > GEMCSCSegmentCollection;
+typedef edm::RangeMap <CSCDetId, edm::OwnVector<GEMCSCSegment> > GEMCSCSegmentCollection;
 
 #include <DataFormats/Common/interface/Ref.h>
 typedef edm::Ref<GEMCSCSegmentCollection> GEMCSCSegmentRef;

@@ -12,6 +12,7 @@
 
 #include <DataFormats/TrackingRecHit/interface/RecSegment.h>
 
+
 #include <DataFormats/GEMRecHit/interface/GEMRecHitCollection.h>
 #include <DataFormats/GEMRecHit/interface/GEMRecHit.h>
 
@@ -22,7 +23,7 @@
 
 #include <iosfwd>
 
-class GEMDetId;
+class CSCDetId;
 
 class GEMCSCSegment GCC11_FINAL : public RecSegment {
 
@@ -32,8 +33,10 @@ public:
     GEMCSCSegment() : theChi2(0.) {}
 	
     /// Constructor
-    GEMCSCSegment(const std::vector<const GEMRecHit*>& proto_segment, LocalPoint origin, 
-        	LocalVector direction, AlgebraicSymMatrix errors, double chi2);
+    //GEMCSCSegment(const std::vector<const GEMRecHit*>& gem_rhs, LocalPoint origin, LocalVector direction, AlgebraicSymMatrix errors, double chi2);
+    GEMCSCSegment(const CSCSegment* csc_segment, const std::vector<const GEMRecHit*>& gem_rhs, LocalPoint origin, LocalVector direction, AlgebraicSymMatrix errors, double chi2);
+        //GEMCSCSegment(const std::vector<const RecHit2DLocalPos*>& gem_rhs, LocalPoint origin, LocalVector direction, AlgebraicSymMatrix errors, double chi2);
+         //GEMCSCSegment(const std::vector<const TrackingRecHit*>& gem_rhs, LocalPoint origin, LocalVector direction, AlgebraicSymMatrix errors, double chi2);
   
     /// Destructor
     virtual ~GEMCSCSegment();
@@ -68,8 +71,9 @@ public:
     virtual int degreesOfFreedom() const { return nRecHits();}	 
 
     //--- Extension of the interface
-        
+    const CSCSegment cscSegment() const { return theCSCSegment; }    
     const std::vector<GEMRecHit>& specificRecHits() const { return theGEMRecHits; } // da modificare
+    //const std::vector<TrackingRecHit>& specificRecHits() const { return theGEMRecHits; } // da modificare
 
     int nRecHits() const { return theGEMRecHits.size(); }        
 
@@ -96,8 +100,9 @@ public:
     void print() const;		
     
  private:
-    
+    CSCSegment theCSCSegment;
     std::vector<GEMRecHit> theGEMRecHits;
+    //std::vector<TrackingRecHit> theGEMRecHits;
     LocalPoint theOrigin;   // in chamber frame - the GeomDet local coordinate system
     LocalVector theLocalDirection; // in chamber frame - the GeomDet local coordinate system
     AlgebraicSymMatrix theCovMatrix; // the covariance matrix

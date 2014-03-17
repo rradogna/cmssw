@@ -10,20 +10,22 @@
 namespace {
   // define a Super Layer Id from the first layer of the first rechits, and put to first layer
   inline
-  DetId buildDetId(GEMDetId id) {
-    return GEMDetId(id.region(),id.ring(),id.station(),1,id.chamber(),id.roll());
+  DetId buildDetId(CSCDetId id) {
+    return CSCDetId (id.endcap(),id.station(),id.ring(),id.chamber(),0);
   }
   
 }
 
-GEMCSCSegment::GEMCSCSegment(const std::vector<const GEMRecHit*>& proto_segment, LocalPoint origin, 
-	LocalVector direction, AlgebraicSymMatrix errors, double chi2) : 
-  RecSegment(buildDetId(proto_segment.front()->gemId())),
+GEMCSCSegment::GEMCSCSegment(const CSCSegment* csc_segment, const std::vector<const GEMRecHit*>& gem_rhs, LocalPoint origin, LocalVector direction, AlgebraicSymMatrix errors, double chi2) : 
+//GEMCSCSegment::GEMCSCSegment(const std::vector<const GEMRecHit*>& gem_rhs, LocalPoint origin, LocalVector direction, AlgebraicSymMatrix errors, double chi2) : 
+  //RecSegment(buildDetId(gem_rhs.front()->gemId())),
+  RecSegment(buildDetId(csc_segment->cscDetId())),
   theOrigin(origin), 
   theLocalDirection(direction), theCovMatrix(errors), theChi2(chi2) {
 
-  for(unsigned int i=0; i<proto_segment.size(); ++i)
-    theGEMRecHits.push_back(*proto_segment[i]);
+  for(unsigned int i=0; i<gem_rhs.size(); ++i){
+    theGEMRecHits.push_back(*gem_rhs[i]);}
+    theCSCSegment = *csc_segment;
 }
 
 GEMCSCSegment::~GEMCSCSegment() {}
