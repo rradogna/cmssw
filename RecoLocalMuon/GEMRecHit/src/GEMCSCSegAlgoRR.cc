@@ -6,6 +6,8 @@
  
 #include "GEMCSCSegAlgoRR.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+#include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
+
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -29,7 +31,7 @@ GEMCSCSegAlgoRR::GEMCSCSegAlgoRR(const edm::ParameterSet& ps) : GEMCSCSegmentAlg
   dYclusBoxMax              = ps.getParameter<double>("dYclusBoxMax");
   preClustering_useChaining = ps.getParameter<bool>("preClusteringUseChaining");
   dPhiChainBoxMax           = ps.getParameter<double>("dPhiChainBoxMax");
-  dThEtaChainBoxMax           = ps.getParameter<double>("dEtaChainBoxMax");
+  dThEtaChainBoxMax         = ps.getParameter<double>("dEtaChainBoxMax");
   maxRecHitsInCluster       = ps.getParameter<int>("maxRecHitsInCluster");
 }
 
@@ -50,19 +52,24 @@ std::vector<GEMCSCSegment> GEMCSCSegAlgoRR::run(GEMCSCEnsamble ensamble, const E
   std::vector<GEMCSCSegment>          segments_temp;
   std::vector<GEMCSCSegment>          segments;
   ProtoSegments rechits_clusters; // this is a collection of groups of rechits
+  EnsambleHitContainer rechits_chain;
   
-  rechits_clusters = this->chainHitsToSegm( cscsegments, rechits );
-  for(auto sub_rechits = rechits_clusters.begin(); sub_rechits !=  rechits_clusters.end(); ++sub_rechits ) {
-      // clear the buffer for the subset of segments:
-      segments_temp.clear();
-      // build the subset of segments:
-      segments_temp = this->buildSegments( (*sub_rechits) );
-      // add the found subset of segments to the collection of all segments in this chamber:
-      segments.insert( segments.end(), segments_temp.begin(), segments_temp.end() );
-    }
+   for (unsigned int s=0; s<cscsegments.size(); ++s){ 
+  //for (auto sub_segment = cscsegments.begin(); sub_segment != cscsegments.end(); ++sub_segment) {
+      rechits_chain = this->chainHitsToSegm(cscsegments[s], rechits );
+      //for(auto sub_rechits = rechits_clusters.begin(); sub_rechits !=  rechits_clusters.end(); ++sub_rechits ) {
+          // clear the buffer for the subset of segments:
+          segments_temp.clear();
+          // build the subset of segments:
+          segments_temp = this->buildSegments(cscsegments[s], rechits_chain);
+          // add the found subset of segments to the collection of all segments in this chamber:
+          segments.insert( segments.end(), segments_temp.begin(), segments_temp.end() );
+      }
+    return segments;
+  }
   
 
-    return segments;
+
     
   /*if(preClustering) {
     // run a pre-clusterer on the given rechits to split obviously separated segment seeds:
@@ -95,7 +102,7 @@ std::vector<GEMCSCSegment> GEMCSCSegAlgoRR::run(GEMCSCEnsamble ensamble, const E
     segments = this->buildSegments(rechits);
     return segments;
   }*/
-}
+
 
 
 // ********************************************************************;
@@ -200,34 +207,35 @@ GEMCSCSegAlgoRR::clusterHits(const EnsambleHitContainer & rechits) {
 }*/
 
 
-GEMCSCSegAlgoRR::ProtoSegments 
-GEMCSCSegAlgoRR::chainHitsToSegm(const EnsambleCSCSegContainer cscsegments, const EnsambleGEMHitContainer & rechits){
+GEMCSCSegAlgoRR::EnsambleHitContainer
+GEMCSCSegAlgoRR::chainHitsToSegm(const CSCSegment* cscsegment, const EnsambleGEMHitContainer & rechits){
 
 
-  ProtoSegments rechits_chains; 
+  //ProtoSegments rechits_chains;
 
   //ProtoSegments seeds;
 
   std::vector <bool> usedCluster;
 
-for (unsigned int s=0; s<cscsegments.size(); ++s){
-  EnsambleHitContainer temp;
+//for (unsigned int s=0; s<cscsegments.size(); ++s){
+  EnsambleHitContainer rechits_chain;
     const CSCChamber* chamber = theEnsamble.first;
-    auto segLP = cscsegments[s]->localPosition();
-    auto segLD = cscsegments[s]->localDirection();
-    auto cscrhs = cscsegments[s]->specificRecHits();
+    auto segLP = cscsegment->localPosition();
+    auto segLD = cscsegment->localDirection();
+    auto cscrhs = cscsegment->specificRecHits();
     
   
-    for (auto rh = cscrhs.begin(); rh!= cscrhs.end(); rh++){
-    temp.push_back(rh->clone());
+    for (auto crh = cscrhs.begin(); crh!= cscrhs.end(); crh++){
+    rechits_chain.push_back(crh->clone());
     }
-        
-    for(unsigned int i = 0; i < rechits.size(); ++i) {   
+    
+    //for (auto grh = rechits.begin(); grh!= rechits.end(); grh++){
+    for(unsigned int i = 0; i < rechits.size(); ++i) {
       //auto gemdetId = rechits[i]->gemId();
       //auto rhRef = 
       auto rhLP = rechits[i]->localPosition();
-      auto erhLEP = rechits[i]->localPositionError();
-      const GEMEtaPartition* rhRef  = theEnsamble.second[cscsegments[s]->cscDetId()];
+      //auto erhLEP = rechits[i]->localPositionError();
+      const GEMEtaPartition* rhRef  = theEnsamble.second[rechits[i]->gemId()];
       auto rhGP = rhRef->toGlobal(rhLP);
       auto rhLP_inSegmRef = chamber->toLocal(rhGP);
       float phi_rh = rhLP_inSegmRef.phi();
@@ -240,19 +248,34 @@ for (unsigned int s=0; s<cscsegments.size(); ++s){
       float phi_ext = extrPoint.phi();
       float theta_ext = extrPoint.theta();
       
-      float Dphi = fabs(phi_ext-phi_rh);
-      float Dtheta = fabs(theta_ext-theta_rh); 
+      if (rechits[i]->gemId().layer()==1){
+          float Dphi_l1 = fabs(phi_ext-phi_rh);
+          float Dtheta_l1 = fabs(theta_ext-theta_rh);
+          bool phiRequirementOK_l1 = Dphi_l1 < dPhiChainBoxMax;
+          bool thetaRequirementOK_l1 = Dtheta_l1 < dThEtaChainBoxMax;
+          if(phiRequirementOK_l1 && thetaRequirementOK_l1){
+              rechits_chain.push_back(rechits[i]->clone());}
+      }
+      
+      
+        
+      if (rechits[i]->gemId().layer()==2){
+          float Dphi_l2 = fabs(phi_ext-phi_rh);
+          float Dtheta_l2 = fabs(theta_ext-theta_rh);
+          bool phiRequirementOK_l2 = Dphi_l2 < dPhiChainBoxMax;
+          bool thetaRequirementOK_l2 = Dtheta_l2 < dThEtaChainBoxMax;
+          if(phiRequirementOK_l2 && thetaRequirementOK_l2){
+              rechits_chain.push_back(rechits[i]->clone());}
+      }
+      
       
       // scegli quello con il minimo dphi e dtheta
            
-      bool phiRequirementOK = Dphi < dPhiChainBoxMax;
-      bool thetaRequirementOK = Dtheta < dThEtaChainBoxMax;
-      if(phiRequirementOK && thetaRequirementOK){
-      temp.push_back(rechits[i]->clone());}
-      }
-      rechits_chains.push_back(temp);
+
+
+      //rechits_chains.push_back(temp);
       
-}
+    }
 
 
 
@@ -313,7 +336,7 @@ for (unsigned int s=0; s<cscsegments.size(); ++s){
 */
   //***************************************************************
 
-      return rechits_chains;
+      return rechits_chain;
 }
 
 /*bool GEMCSCSegAlgoRR::isGoodToMerge(EnsambleHitContainer & newChain, EnsambleHitContainer & oldChain) {
@@ -349,13 +372,19 @@ for (unsigned int s=0; s<cscsegments.size(); ++s){
 
 
 
-std::vector<GEMCSCSegment> GEMCSCSegAlgoRR::buildSegments(const EnsambleHitContainer& rechits) {
-  std::vector<GEMCSCSegment> gemcsc_segs;
+std::vector<GEMCSCSegment> GEMCSCSegAlgoRR::buildSegments(const CSCSegment* cscsegment, const EnsambleHitContainer& rechits) {
+std::vector<GEMCSCSegment> gemcsc_segs;
+std::vector<const GEMRecHit*> gemrhs;
 
   proto_segment.clear();
   // select hits from the ensemble and sort it 
+  //for(unsigned int i = 0; i < rechits.size(); ++i) {
   for (auto rh=rechits.begin(); rh!=rechits.end();rh++){
     proto_segment.push_back(*rh);
+    const TrackingRecHit& hit = (**rh);
+      if (DetId(hit.rawId()).subdetId() == MuonSubdetId::GEM ){
+          
+          gemrhs.push_back(dynamic_cast<const GEMRecHit*>(*rh));}
   }
   if (proto_segment.size() < minHitsPerSegment){
     return gemcsc_segs;
@@ -365,7 +394,7 @@ std::vector<GEMCSCSegment> GEMCSCSegAlgoRR::buildSegments(const EnsambleHitConta
   this->fillLocalDirection();
   AlgebraicSymMatrix protoErrors = this->calculateError();
   this->flipErrors( protoErrors ); 
-  GEMCSCSegment tmp(proto_segment,protoIntercept, protoDirection, protoErrors,protoChi2);
+  GEMCSCSegment tmp(cscsegment, gemrhs, protoIntercept, protoDirection, protoErrors,protoChi2);
   gemcsc_segs.push_back(tmp);
   return gemcsc_segs;
 }
@@ -457,7 +486,7 @@ void GEMCSCSegAlgoRR::fillChiSquared() {
   const CSCChamber* ens = theEnsamble.first;
   for (auto ih = proto_segment.begin(); ih != proto_segment.end(); ++ih) {
     const RecHit2DLocalPos& hit = (**ih);
-    const GEMEtaPartition* roll  = theEnsamble.second[hit.gemId()];
+    const GEMEtaPartition* roll  = theEnsamble.second[hit.rawId()];
     GlobalPoint gp         = roll->toGlobal(hit.localPosition());
     // Locat w,r,t, to the first layer;
     LocalPoint  lp         = ens->toLocal(gp); 
@@ -509,7 +538,7 @@ void GEMCSCSegAlgoRR::fillLocalDirection() {
   // localDir may need sign flip to ensure it points outward from IP
   // ptc: Examine its direction and origin in global z: to point outward
   // the localDir should always have same sign as global z...
-  const GEMEtaPartition* ens = theEnsamble.first;
+  const CSCChamber* ens = theEnsamble.first;
 
   double globalZpos    = ( ens->toGlobal( protoIntercept ) ).z();
   double globalZdir    = ( ens->toGlobal( localDir ) ).z();
@@ -529,7 +558,7 @@ AlgebraicSymMatrix GEMCSCSegAlgoRR::weightMatrix() {
   
   for (it = proto_segment.begin(); it != proto_segment.end(); ++it) {
     
-    const GEMRecHit& hit = (**it);
+    const RecHit2DLocalPos& hit = (**it);
     ++row;
     matrix(row, row)   = protoChiUCorrection*hit.localPositionError().xx();
     matrix(row, row+1) = hit.localPositionError().xy();
@@ -556,7 +585,7 @@ CLHEP::HepMatrix GEMCSCSegAlgoRR::derivativeMatrix(){
 
   for (auto ih = proto_segment.begin(); ih != proto_segment.end(); ++ih) {
     const RecHit2DLocalPos& hit = (**ih);
-    const GEMEtaPartition* roll  = theEnsamble.second[hit.gemId()];
+    const GEMEtaPartition* roll  = theEnsamble.second[hit.rawId()];
     GlobalPoint gp         = roll->toGlobal(hit.localPosition());
     // Locat w,r,t, to the first layer;
     LocalPoint  lp         = ens->toLocal(gp); 

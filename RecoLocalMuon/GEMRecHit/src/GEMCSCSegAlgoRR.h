@@ -50,12 +50,12 @@ private:
   //ProtoSegments clusterHits(const EnsambleHitContainer & rechits);
 
   // Build groups of rechits that are separated in strip numbers and Z to save time on the segment finding
-  ProtoSegments chainHitsToSegm(const EnsambleCSCSegContainer cscsegments, const EnsambleGEMHitContainer & rechits);
-
+  //ProtoSegments chainHitsToSegm(const EnsambleCSCSegContainer cscsegments, const EnsambleGEMHitContainer & rechits);
+  EnsambleHitContainer chainHitsToSegm(const CSCSegment* cscsegment, const EnsambleGEMHitContainer & rechits);
   //bool isGoodToMerge(EnsambleHitContainer & newChain, EnsambleHitContainer & oldChain);
 
   // Build track segments in this chamber (this is where the actual segment-building algorithm hides.)
-  std::vector<GEMCSCSegment> buildSegments(const EnsambleHitContainer& rechits);
+  std::vector<GEMCSCSegment> buildSegments(const CSCSegment* cscsegment, const EnsambleHitContainer& rechits);
 
   void doSlopesAndChi2();
   void fitSlopes();

@@ -82,8 +82,8 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
     for (auto rh = cscSrhs.begin(); rh!= cscSrhs.end(); rh++){
     std::vector<RecHit2DLocalPos* > pp = ensembleRH[CSCId.rawId()];
     pp.push_back(rh->clone());
-    ensembleRH[CSCId.rawId()]=pp;*/
-    }
+    ensembleRH[CSCId.rawId()]=pp;
+    }*/
     
     int cscEndCap = CSCId.endcap();
     int cscStation = CSCId.station();
@@ -129,7 +129,7 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
 	
     //for(CSCRecHit2DCollection::const_iterator it2 = recHits->begin(); it2 != recHits->end(); it2++) {
     for(auto enIt=ensembleRH.begin(); enIt != ensembleRH.end(); enIt++) {    
-        std::vector<const GEMRecHit*> gemRecHits;
+    std::vector<const GEMRecHit*> gemRecHits;
 	std::vector<const CSCSegment*> cscSegments;
 	cscSegments = ensembleS[enIt->first]; /////????
 	//std::vector<const RecHit2DLocalPos*> gemcscRecHits;
@@ -140,7 +140,7 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
 	
         for(auto rechit = enIt->second.begin(); rechit != enIt->second.end(); rechit++) {
           gemRecHits.push_back(*rechit);
-          ens[enIt->first]=gemgeom_->etaPartition((*rechit)->gemId());
+          ens[(*rechit)->gemId()]=gemgeom_->etaPartition((*rechit)->gemId()); //NEW
 	  
 	  /*auto gemlike = gemgeom_->etaPartition((*rechit)->rawId());
 	  if (gemlike !=0)
@@ -153,7 +153,7 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
 	  std::cout<<"non ti conosco"<<std::endl;*/
         }  
 	  
-    GEMCSCSegmentAlgorithm::GEMCSCEnsamble ensamble(std::pair<const CSCChamber*, std::map<uint32_t,const GEMEtaPartition *> >(cscChamber,ens));
+    GEMCSCSegmentAlgorithm::GEMCSCEnsamble ensamble(std::pair<const CSCChamber*, std::map<uint32_t,const GEMEtaPartition* > >(cscChamber,ens));
    // no geomdet ma gem eta partition
    // xke io voglio per ogni camera il segmento e le eta partition associate alla camera e tutti i rec hit che adesso sono solo di gem 
     
