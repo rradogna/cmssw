@@ -66,7 +66,7 @@ void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits, const CSCSe
     setup.get<MuonGeometryRecord>().get(cscGeo);
     
     std::map<uint32_t, std::vector<GEMRecHit*> > ensembleRH;
-    std::map<uint32_t, std::vector<CSCSegment*> > ensembleS;
+    std::map<uint32_t, std::vector<const CSCSegment*> > ensembleS;
     //std::map<uint32_t, std::vector<RecHit2DLocalPos*> > ensembleRH;
     //std::map<uint32_t, std::vector<TrackingRecHit*> > ensembleRH;
 
@@ -74,7 +74,7 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
     CSCDetId CSCId = segm->cscDetId();
     if(CSCId.station()==1 && CSCId.ring()==1 ){
        //CSCDetId id(segm->cscDetId().endcap(),segm->cscDetId().station(),segm->cscDetId().ring(),segm->cscDetId().chamber(),1);
-    std::vector<CSCSegment* > ss = ensembleS[CSCId.rawId()];
+    std::vector<const CSCSegment* > ss = ensembleS[CSCId.rawId()];
     ss.push_back(segm->clone());
     ensembleS[CSCId.rawId()]=ss;  
     
@@ -130,8 +130,7 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
     //for(CSCRecHit2DCollection::const_iterator it2 = recHits->begin(); it2 != recHits->end(); it2++) {
     for(auto enIt=ensembleRH.begin(); enIt != ensembleRH.end(); enIt++) {    
     std::vector<const GEMRecHit*> gemRecHits;
-	std::vector<const CSCSegment*> cscSegments;
-	cscSegments = ensembleS[enIt->first]; /////????
+	std::vector<const CSCSegment*> cscSegments = ensembleS[enIt->first]; /////????
 	//std::vector<const RecHit2DLocalPos*> gemcscRecHits;
         std::map<uint32_t,const GEMEtaPartition* > ens;
         //std::map<uint32_t,const CSCChamber* > ens;
@@ -157,7 +156,7 @@ for(CSCSegmentCollection::const_iterator segm = cscsegments->begin(); segm != cs
    // no geomdet ma gem eta partition
    // xke io voglio per ogni camera il segmento e le eta partition associate alla camera e tutti i rec hit che adesso sono solo di gem 
     
-    LogDebug("GEMCSCSegment|GEMCSC") << "found " << gemcscRecHits.size() << " rechits in chamber " << *enIt;
+    //LogDebug("GEMCSCSegment|GEMCSC") << "found " << gemcscRecHits.size() << " rechits in chamber " << *enIt;
 
         // given the chamber select the appropriate algo... and run it
     std::vector<GEMCSCSegment> segv = algo->run(ensamble, cscSegments, gemRecHits);
